@@ -305,15 +305,15 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					1E91A9D2F219E2F4A70B7375 = {
-						DevelopmentTeam = 33DUL485L9;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					6DC7A011F0EC3099B417741F = {
-						DevelopmentTeam = 33DUL485L9;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					BE0B10B960463114E3E9B3B3 = {
-						DevelopmentTeam = 33DUL485L9;
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 				};
