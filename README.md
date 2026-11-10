@@ -157,10 +157,12 @@ built again.
 You need a Mac with Xcode, [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install
 xcodegen`), an iPhone on iOS 17 or later (screen capture was tested on iOS 26.6), and a USB cable.
 
-1. Clone the repository and open a terminal in its `ios` folder.
+1. Clone the repository and open a terminal in it.
 2. Copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig` and set your own
    `KDL_ID_PREFIX` (for example `com.yourname`) and `DEVELOPMENT_TEAM`. App ids are unique across
    Apple accounts, so the prefix cannot be `com.abrignoni`. `Local.xcconfig` is ignored by git.
+   The repository sets no team of its own, so if Xcode says signing "requires a development
+   team", this file is missing or its `DEVELOPMENT_TEAM` is empty.
 3. Run `xcodegen generate`, then open `KDL.xcodeproj` in Xcode.
 4. In Xcode > Settings > Accounts, add your Apple ID if it is not there.
 5. On the iPhone, turn on Settings > Privacy & Security > Developer Mode (the phone restarts), and
