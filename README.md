@@ -1,11 +1,18 @@
-# KDL for iOS (0.2.0)
+# Known-data logger for iOS (0.2.0)
 
-The iOS version of the known-data logger. iOS gives apps no way to watch other apps' screens, taps,
-typed text or notifications. Instead, the tester runs a screen capture, does each action in its app
-and marks it (double-tap the back of the phone), then labels each mark from its screenshot. KDL
-writes the same rows, hash chain and export folder as the Android app, and every app switch is
-logged with the app's bundle id. `tools/make_documentation.py` and the other tools read an iOS
-export the same way.
+The iOS version of the known-data logger (KDL): an app for test iPhones that records what a tester
+did, so parser authors can check forensic tools against it. The Android version is
+[known-data-logger](https://github.com/abrignoni/known-data-logger).
+
+iOS gives apps no way to watch other apps' screens, taps, typed text or notifications. Instead, the
+tester runs a screen capture, does each action in its app and marks it (double-tap the back of the
+phone), then labels each mark from its screenshot. KDL writes the same rows, hash chain and export
+folder as the Android app, and every app switch is logged with the app's bundle id.
+
+The export is checked with the tools in the Android repository, which read both apps' exports:
+`tools/make_documentation.py` (spreadsheet, sha256 and hash chain checks), `tools/kdl_check.py`
+(grades a LEAPP artifact's output against the export) and `tools/kdl_locate.py`. See
+[Checking an export](#checking-an-export).
 
 ## Workflow
 
@@ -130,7 +137,7 @@ reviewed; this has to be settled before any TestFlight or App Store build.
 
 ## Where it keeps the log
 
-`kl.db`, with the Android app's schema 3 (`docs/DATABASE.md`), in the App Group container
+`kl.db`, with the Android app's schema 3 ([docs/DATABASE.md](https://github.com/abrignoni/known-data-logger/blob/main/docs/DATABASE.md) in the Android repository), in the App Group container
 `group.<prefix>.knowndatalogger`, under `Library/KDL/`, so the widget and controls can write
 to it. Journal mode is DELETE. Each write runs in one `BEGIN IMMEDIATE` transaction that reads the
 newest hash and inserts the row, so the app and its extensions never hash over the same previous
@@ -183,14 +190,30 @@ reviewed, but anyone who ships KDL through the App Store or TestFlight has to ch
 ## Tests
 
 ```bash
-cd ios/KDLCore && swift test
+cd KDLCore && swift test
 ```
 
-The core reproduces the shared test vector (`23843a77…`, the same row as `ChainTest` and
-`tools/test_make_documentation.py`), re-verifies the hash chain of an export
+The core reproduces the shared hash test vector (`23843a77…`, the same row as `ChainTest` and
+`tools/test_make_documentation.py` in the Android repository; a change to the hashed form must land
+in both repositories together), re-verifies the hash chain of an export
 (`KDL_ANDROID_EXPORT=<export folder>`; skipped when absent), checks revisions, tombstones, restart
-and clock change detection, two writers on one database, and runs `tools/make_documentation.py` on
-an iOS export (exit 0, no warnings).
+and clock change detection, two writers on one database, and runs `make_documentation.py` on an iOS
+export (exit 0, no warnings). That last test looks for the Android repository's `tools` folder in
+`KDL_TOOLS`, or in a `known-data-logger` clone beside this one, and is skipped when it finds neither.
+
+## Checking an export
+
+Copy the export folder off the phone (Files app, or `xcrun devicectl device copy from` on the app's
+`Documents/Exports`), clone the Android repository, and run:
+
+```bash
+python3 known-data-logger/tools/make_documentation.py <export folder> -o documentation.xlsx
+```
+
+It exits 1 and prints a WARNING when the sha256 or the hash chain does not check out. To grade a
+parser, run iLEAPP on an extraction of the phone (an encrypted backup works for Notes and Safari) and
+then `tools/kdl_check.py --export <export folder> --leapp-output <iLEAPP output> --artifact <key>
+--package <bundle id> -o check.xlsx`.
 
 ## Tested
 

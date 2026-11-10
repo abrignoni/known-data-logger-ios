@@ -58,10 +58,15 @@ final class ExportTests: XCTestCase {
 
     /// The repository's own verifier must accept an iOS export: exit 0 and no WARNING line.
     func testMakeDocumentationAcceptsTheExport() throws {
-        let tool = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
-            .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("tools/make_documentation.py")
-        guard FileManager.default.fileExists(atPath: tool.path) else { throw XCTSkip("tools/make_documentation.py not found") }
+        // The tools live in the Android repository: KDL_TOOLS, or a known-data-logger clone beside this repository.
+        let repo = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+            .deletingLastPathComponent().deletingLastPathComponent()
+        let tools = ProcessInfo.processInfo.environment["KDL_TOOLS"].map { URL(fileURLWithPath: $0) }
+            ?? repo.deletingLastPathComponent().appendingPathComponent("known-data-logger/tools")
+        let tool = tools.appendingPathComponent("make_documentation.py")
+        guard FileManager.default.fileExists(atPath: tool.path) else {
+            throw XCTSkip("make_documentation.py not found; set KDL_TOOLS to the Android repository's tools folder")
+        }
         let s = try filledStore()
         let out = try Exporter.export(store: s, to: dir, logger: LoggerInfo(package: "com.abrignoni.knowndatalogger", versionName: "0.1.0"))
         let p = Process()
